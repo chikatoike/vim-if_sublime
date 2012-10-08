@@ -1,7 +1,7 @@
-* vim-if\_sublime
+* vim-if_sublime
 
 ** 概要
-vim-if\_sublime は Vim上で Sublime Text 2 の API を模倣することにより、Sublime Text 2 のパッケージを動作させることを可能にします。現状、SublimeClang の一部の機能が動作する範囲のAPIを実装しています。
+vim-if_sublime は Vim上で Sublime Text 2 の API を模倣することにより、Sublime Text 2 のパッケージを動作させることを可能にします。現状、SublimeClang の一部の機能が動作する範囲のAPIを実装しています。
 
 ** 必要なもの
 - Python インタフェースが有効なVim
@@ -15,4 +15,4 @@ SublimeClangのパッケージを、Sublime Text 2 のPackage以下に配置し�
 
 *** 補完
 補完機能を使う場合は以下のようにして補完関数を設定します。
-:set omnifunc=if\_sublime#complete
+:set omnifunc=if_sublime#complete
