@@ -18,11 +18,14 @@ function! if_sublime#default_package_path(package)
   if s:is_windows || s:is_cygwin
     return expand('$APPDATA/Sublime Text 2/Packages/') . a:package
   elseif s:is_mac
-    return expand('  ~/Library/Application Support/Sublime Text 2/Packages/') . a:package
-  else
-    " TODO linux
-    return ''
+    return expand('~/Library/Application Support/Sublime Text 2/Packages/') . a:package
+  else " linux
+    return expand('~/.config/sublime-text-2/Packages/') . a:package
   endif
+endfunction
+
+function! if_sublime#is_windows()
+  return s:is_windows
 endfunction
 
 function! s:add_path(python_path)

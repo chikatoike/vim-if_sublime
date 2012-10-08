@@ -12,6 +12,8 @@ endif
 
 call if_sublime#register_plugin(g:sublimeclang_package_path)
 
+let $PATH .= (if_sublime#is_windows() ? ';' : ':') . g:sublimeclang_package_path
+
 command! SublimeTextCommandClangGotoDef call if_sublime#run_text_command('clang_goto_def')
 
 let &cpo = s:save_cpo
