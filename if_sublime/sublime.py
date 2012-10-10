@@ -232,7 +232,7 @@ class Settings(object):
         with open(files[0], 'r') as f:
             text = f.read()
 
-        # TODO remove block comments?
+        # TODO remove block style comments
         text = re.sub(r'//.*', '', text) # remove line comments.
         return json.loads(text)
 
@@ -339,10 +339,28 @@ class View(object):
         pass
 
     def rowcol(self, point):
-        return point.get(self)
+        """
+        >>> view = View()
+        >>> view.rowcol(0)
+        (0, 0)
+        >>> view.rowcol(1)
+        (0, 1)
+        >>> view.rowcol(17)
+        (0, 17)
+        >>> view.rowcol(18)
+        (0, 18)
+        >>> view.rowcol(19)
+        (1, 0)
+        >>> view.rowcol(20)
+        (1, 1)
+        """
+        if isinstance(point, Point):
+            return point.get(self)
+        elif isinstance(point, int):
+            return self._get_rowcol(point)
 
     def text_point(self, row, col):
-        return Point(row, col, self)
+        return Point(row, col, len(self._substr_pos(row, col)))
 
     def _point_min(self):
         """
@@ -357,29 +375,21 @@ class View(object):
         raise NotImplementedError
 
     def _substr_pos(self, line, col):
-        lines = self.vimwin.buffer[: line]
-        last = self.vimwin.buffer[line][: col]
-        return '\n'.join(lines) + '\n' + last
-
-    def _get_rowcol(self, point):
         """
         >>> view = View()
-        >>> view._get_rowcol(0)
-        (0, 0)
-        >>> view._get_rowcol(1)
-        (0, 1)
-        >>> view._get_rowcol(20)
-        (1, 1)
+        >>> view._substr_pos(0, 0)
+        u''
         """
-        text = '\n'.join(self.vimwin.buffer[:])
-        lines = text[: point].split('\n')
-        line = len(lines) - 1
-        col = len(lines[-1])
-        return (line, col)
+        lines = self.vimwin.buffer[: line]
+        last = self.vimwin.buffer[line][: col]
+        return '\n'.join(lines + [last])
 
-    # def _range(self, begin_point, last_point):
-    #     lines = self.vimwin.buffer[: line]
-    #     last = self.vimwin.buffer[line][: col]
+    def _get_rowcol(self, point):
+        text = '\n'.join(self.vimwin.buffer[:])
+        lines = text[: point + 1].split('\n')
+        line = len(lines) - 1
+        col = len(lines[-1]) - 1
+        return (line, col)
 
     def substr(self, point):
         """
@@ -389,12 +399,6 @@ class View(object):
         >>> view.substr(Region(0, 0))
         u''
         >>> view.substr(Region(0, 1))
-        u'#'
-        >>> def f():
-        ...     #import pdb; pdb.set_trace()
-        ...     r = Region(0, 1)
-        ...     return view.substr(r)
-        >>> f()
         u'#'
         >>> view.substr(Region(0, 19))
         u'#include "stdio.h"\\n'
@@ -431,6 +435,11 @@ class View(object):
     def line(self, point):
         """
         >>> view = View()
+        >>> def f():
+        ...     #import pdb; pdb.set_trace()
+        ...     return view.substr(view.line(view.text_point(0, 0))) # NOTE: line() does not contains eol.
+        >>> f()
+        u'#include "stdio.h"'
         >>> view.substr(view.line(view.text_point(0, 0))) # NOTE: line() does not contains eol.
         u'#include "stdio.h"'
         """
@@ -567,64 +576,40 @@ class Point(object):
     In SublimeText, `point` is int. int value is offset of start of buffer.
     In this implementation,
     point is formed by tuple of line and column.
-    NOTE line and column are zero based.
+    NOTE line and col are zero based.
+    NOTE line and col is never used. it is just a hint.
+    NOTE offset type may be long but not int.
     """
-    def __init__(self, line, col, view = None):
-        if view is None:
-            self._line = line
-            self._col = col
-            self._offset = None
-        else:
-            self._line = line
-            self._col = col
-            self._offset = len(view._substr_pos(line, col))
+    def __init__(self, line, col, offset):
+        self._line = line
+        self._col = col
+        self._offset = offset
 
     def __str__(self):
         return 'Point(%d, %d)' % (self._line, self._col)
 
     def __cmp__(self, other):
-        """
-        TODO add test
-        """
         if isinstance(other, Point):
-            if self._offset is None:
-                if self._line != other._line:
-                    return self._line - other._line
-                else:
-                    return self._col - other._col
-            else:
-                return self._offset - other._offset
+            return self._offset - other._offset
         elif isinstance(other, int):
             return self._offset - other
         else:
             raise NotImplementedError
 
     def __sub__(self, other):
-        if isinstance(other, int):
-            if (self._col - other) >= 0:
-                return Point(self._line, self._col - other)
-            else:
-                raise NotImplementedError
-            # offset = self.offset - other
-            # return Point.fromint(offset)
+        if isinstance(other, Point):
+            return Point.fromint(self._offset - other._offset)
+        elif isinstance(other, int):
+            return Point.fromint(self._offset - other)
         else:
             raise NotImplementedError
 
     def get(self, view):
-        if self._offset is None or self._line >= 0:
-            return (self._line, self._col)
-        else:
-            return view._get_rowcol(self._offset)
+        return view._get_rowcol(self._offset)
 
     @staticmethod
     def fromint(offset):
-        # compat.trace('fromint: ' + str(type(offset)))
-        if offset == 0:
-            return Point(0, 0)
-        else:
-            point = Point(-1, -1)
-            point._offset = offset
-            return point
+        return Point(-1, -1, offset)
 
 
 # Instances {{{1
