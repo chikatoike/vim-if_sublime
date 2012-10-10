@@ -173,7 +173,7 @@ class DummyBuffer(object):
     def __init__(self, path):
         self.name = path
         with open(path, 'r') as f:
-            self.text = f.readlines()
+            self.text = f.read().split("\n")
             self.text = [unicode(line, 'utf-8') for line in self.text]
 
     def __getitem__(self, key):

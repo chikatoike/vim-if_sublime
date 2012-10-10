@@ -362,9 +362,18 @@ class View(object):
         return '\n'.join(lines) + '\n' + last
 
     def _get_rowcol(self, point):
+        """
+        >>> view = View()
+        >>> view._get_rowcol(0)
+        (0, 0)
+        >>> view._get_rowcol(1)
+        (0, 1)
+        >>> view._get_rowcol(20)
+        (1, 1)
+        """
         text = '\n'.join(self.vimwin.buffer[:])
         lines = text[: point].split('\n')
-        line = len(lines)
+        line = len(lines) - 1
         col = len(lines[-1])
         return (line, col)
 
@@ -374,22 +383,30 @@ class View(object):
 
     def substr(self, point):
         """
-        >>> v = View()
-        >>> v.substr(v.text_point(0, 0))
+        >>> view = View()
+        >>> view.substr(view.text_point(0, 0))
         u'#'
-        >>> v.substr(Region(0, 1))
+        >>> view.substr(Region(0, 0))
+        u''
+        >>> view.substr(Region(0, 1))
         u'#'
-        >>> v.substr(Region(0, 19))
+        >>> def f():
+        ...     #import pdb; pdb.set_trace()
+        ...     r = Region(0, 1)
+        ...     return view.substr(r)
+        >>> f()
+        u'#'
+        >>> view.substr(Region(0, 19))
         u'#include "stdio.h"\\n'
-        >>> v.substr(Region(v.text_point(0, 0), v.text_point(0, 5)))
+        >>> view.substr(Region(view.text_point(0, 0), view.text_point(0, 5)))
         u'#incl'
-        >>> v.substr(Region(v.text_point(11, 1), v.text_point(11, 6)))
+        >>> view.substr(Region(view.text_point(11, 1), view.text_point(11, 6)))
         u'type1'
-        >>> v._get_match_pos(r'\w+', '\\tt.member1 = 1;', 4)
+        >>> view._get_match_pos(r'\w+', '\\tt.member1 = 1;', 4)
         (3, 10)
-        >>> v.word(v.text_point(12, 4)).get(v)
+        >>> view.word(view.text_point(12, 4)).get(view)
         ((12, 3), (12, 10))
-        >>> v.substr(v.word(v.text_point(12, 4)))
+        >>> view.substr(view.word(view.text_point(12, 4)))
         u'member1'
         """
         if isinstance(point, Point):
@@ -413,9 +430,9 @@ class View(object):
 
     def line(self, point):
         """
-        >>> v = View()
-        >>> v.substr(v.line(v.text_point(0, 0)))
-        u'#include "stdio.h"\\n'
+        >>> view = View()
+        >>> view.substr(view.line(view.text_point(0, 0))) # NOTE: line() does not contains eol.
+        u'#include "stdio.h"'
         """
         # args is point or region
         if isinstance(point, Point):
@@ -430,8 +447,8 @@ class View(object):
 
     def word(self, point):
         """
-        >>> v = View()
-        >>> v.substr(v.word(v.text_point(11, 5)))
+        >>> view = View()
+        >>> view.substr(view.word(view.text_point(11, 5)))
         u'type1'
         """
         # args is point or region
@@ -446,10 +463,10 @@ class View(object):
 
     def _get_match_pos(self, pattern, text, current_col):
         """
-        >>> v = View()
-        >>> v._get_match_pos(r'\w+', 'def aaa(arg):', 0)
+        >>> view = View()
+        >>> view._get_match_pos(r'\w+', 'def aaa(arg):', 0)
         (0, 3)
-        >>> v._get_match_pos(r'\w+', '\\tdef aaa(arg):', 6)
+        >>> view._get_match_pos(r'\w+', '\\tdef aaa(arg):', 6)
         (5, 8)
         """
         for m in re.finditer(pattern, text):
@@ -474,9 +491,9 @@ class RegionSet(object):
 
     def __iter__(self):
         """
-        >>> v = View()
-        >>> r = Region(v.text_point(0, 0), v.text_point(0, 1))
-        >>> [i for i in RegionSet(r, v)][0].begin().get(v)
+        >>> view = View()
+        >>> r = Region(view.text_point(0, 0), view.text_point(0, 1))
+        >>> [i for i in RegionSet(r, view)][0].begin().get(view)
         (0, 0)
         """
         return (i for i in  self.regions)
@@ -521,18 +538,21 @@ class Region(object):
 
     def begin(self):
         """
-        >>> v = View()
-        >>> r = Region(v.text_point(0, 0), v.text_point(0, 1))
-        >>> r.begin().get(v)
+        >>> view = View()
+        >>> r = Region(view.text_point(0, 0), view.text_point(0, 1))
+        >>> r.begin().get(view)
         (0, 0)
         """
         return min(self.a, self.b)
 
     def end(self):
         """
-        >>> v = View()
-        >>> r = Region(v.text_point(0, 0), v.text_point(0, 1))
-        >>> r.end().get(v)
+        >>> view = View()
+        >>> r = Region(view.text_point(0, 0), view.text_point(0, 1))
+        >>> r.end().get(view)
+        (0, 1)
+        >>> r = Region(0, 1)
+        >>> r.end().get(view)
         (0, 1)
         """
         return max(self.a, self.b)
@@ -567,11 +587,13 @@ class Point(object):
         TODO add test
         """
         if isinstance(other, Point):
-            if self._line != other._line:
-                return self._line - other._line
+            if self._offset is None:
+                if self._line != other._line:
+                    return self._line - other._line
+                else:
+                    return self._col - other._col
             else:
-                return self._col - other._col
-            # return self._offset - other._offset
+                return self._offset - other._offset
         elif isinstance(other, int):
             return self._offset - other
         else:
@@ -597,7 +619,7 @@ class Point(object):
     @staticmethod
     def fromint(offset):
         # compat.trace('fromint: ' + str(type(offset)))
-        if offset == 1:
+        if offset == 0:
             return Point(0, 0)
         else:
             point = Point(-1, -1)
