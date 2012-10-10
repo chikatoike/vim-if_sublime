@@ -44,6 +44,37 @@ def vimcommand(expr, env = {}):
     setvimenv(env.copy())
     return vim.command(expr)
 
+
+class VimWindow(object):
+    def __init__(self, window):
+        self.window = window
+
+    @property
+    def buffer(self):
+        return VimBuffer(self.window.buffer)
+
+    @property
+    def cursor(self):
+        return self.window.cursor
+
+    @property
+    def height(self):
+        return self.window.height
+
+
+class VimBuffer(object):
+    def __init__(self, buffer):
+        self.buffer = buffer
+
+    def __getitem__(self, key):
+        return unicode(self.buffer[key], compat.getbufferencoding(buffer.name))
+
+    def __setitem__(self, key, value):
+        self.buffer[key] = value.encode(compat.getbufferencoding(buffer.name))
+
+    # TODO implement other attributes.
+
+
 class VimCompat(object):
     def __init__(self):
         self.vim = DummyObject()
@@ -73,6 +104,12 @@ class VimCompat(object):
     def getfiletype(self, path):
         self.trace('VimCompat.getfiletype: ' + path)
         return self.vim.eval('get(g:vimsublime_filetype, getbufvar(g:sublimenv.path, "&filetype"), "")', locals())
+
+    def getbufferencoding(self, path):
+        encoding = compat.getbufvar(buffer.name, '&fileencoding')
+        if encoding == '':
+            encoding = compat.getbufvar(buffer.name, '&encoding')
+        return encoding
 
     def globpath(self, pattern):
         return DummyCompat().globpath(pattern)
@@ -137,15 +174,17 @@ class DummyBuffer(object):
         self.name = path
         with open(path, 'r') as f:
             self.text = f.readlines()
+            self.text = [unicode(line, 'utf-8') for line in self.text]
 
     def __getitem__(self, key):
         # print('DummyBuffer.__getitem__: ' + repr(self.text[key]))
         return self.text[key]
 
 
-# Sublime Text 2 builtin commands {{{1
+# Instances {{{1
 compat = create_compat()
 
+# Sublime Text 2 builtin commands {{{1
 class DummyCommand(object):
     def __init__(self, extra = None):
         # compat.trace('DummyCommand.__init__')

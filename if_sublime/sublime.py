@@ -27,7 +27,7 @@ def status_message(string):
 
 def set_timeout(callback, delay):
     """
-    This function can call from different thread.
+    This function can be called from different thread.
     TODO Make thread safe.
     """
     deferred.register(Callback(callback, delay))
@@ -376,17 +376,21 @@ class View(object):
         """
         >>> v = View()
         >>> v.substr(v.text_point(0, 0))
-        '#'
+        u'#'
+        >>> v.substr(Region(0, 1))
+        u'#'
+        >>> v.substr(Region(0, 19))
+        u'#include "stdio.h"\\n'
         >>> v.substr(Region(v.text_point(0, 0), v.text_point(0, 5)))
-        '#incl'
+        u'#incl'
         >>> v.substr(Region(v.text_point(11, 1), v.text_point(11, 6)))
-        'type1'
+        u'type1'
         >>> v._get_match_pos(r'\w+', '\\tt.member1 = 1;', 4)
         (3, 10)
         >>> v.word(v.text_point(12, 4)).get(v)
         ((12, 3), (12, 10))
         >>> v.substr(v.word(v.text_point(12, 4)))
-        'member1'
+        u'member1'
         """
         if isinstance(point, Point):
             line, col = self.rowcol(point)
@@ -411,7 +415,7 @@ class View(object):
         """
         >>> v = View()
         >>> v.substr(v.line(v.text_point(0, 0)))
-        '#include "stdio.h"\\n'
+        u'#include "stdio.h"\\n'
         """
         # args is point or region
         if isinstance(point, Point):
@@ -428,7 +432,7 @@ class View(object):
         """
         >>> v = View()
         >>> v.substr(v.word(v.text_point(11, 5)))
-        'type1'
+        u'type1'
         """
         # args is point or region
         if isinstance(point, Point):
