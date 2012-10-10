@@ -385,11 +385,15 @@ class View(object):
         return '\n'.join(lines + [last])
 
     def _get_rowcol(self, point):
-        text = '\n'.join(self.vimwin.buffer[:])
-        lines = text[: point + 1].split('\n')
-        line = len(lines) - 1
-        col = len(lines[-1]) - 1
-        return (line, col)
+        i = 0
+        row = 0
+        for line in self.vimwin.buffer:
+            llen = len(line) + 1
+            if point < (i + llen):
+                return (row, point - i)
+            i += llen
+            row += 1
+        raise Exception('View._get_rowcol: point is out of range.')
 
     def substr(self, point):
         """
@@ -400,6 +404,8 @@ class View(object):
         u''
         >>> view.substr(Region(0, 1))
         u'#'
+        >>> view.substr(Region(0, 18))
+        u'#include "stdio.h"'
         >>> view.substr(Region(0, 19))
         u'#include "stdio.h"\\n'
         >>> view.substr(Region(view.text_point(0, 0), view.text_point(0, 5)))
@@ -435,11 +441,6 @@ class View(object):
     def line(self, point):
         """
         >>> view = View()
-        >>> def f():
-        ...     #import pdb; pdb.set_trace()
-        ...     return view.substr(view.line(view.text_point(0, 0))) # NOTE: line() does not contains eol.
-        >>> f()
-        u'#include "stdio.h"'
         >>> view.substr(view.line(view.text_point(0, 0))) # NOTE: line() does not contains eol.
         u'#include "stdio.h"'
         """
