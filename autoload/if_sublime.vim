@@ -16,7 +16,7 @@ let s:is_mac = !s:is_windows && !s:is_cygwin
 
 function! if_sublime#default_package_path(package)
   if s:is_windows || s:is_cygwin
-    return expand('$APPDATA/Sublime Text 2/Packages/') . a:package
+    return expand('$APPDATA\Sublime Text 2\Packages\') . a:package
   elseif s:is_mac
     return expand('~/Library/Application Support/Sublime Text 2/Packages/') . a:package
   else " linux

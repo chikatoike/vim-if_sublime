@@ -37,19 +37,40 @@ def active_window():
     """ TODO Returns current tabpage. """
     return _window
 
+def get_clipboard():
+    raise NotImplementedError
+
+def set_clipboard(string):
+    raise NotImplementedError
+
+def scope_selector(scope, selector):
+    raise NotImplementedError
+
+
+# sublime module (platform) {{{1
+_osname = unicode(
+    'windows' if platform_.system() == 'Windows' else
+    'osx' if platform_.system() == 'osx' else
+    'linux' if platform_.system() == 'Linux' else
+    '')
+
+_sublime_data_path = unicode(os.path.expandvars(
+    '$APPDATA\\Sublime Text 2' if platform_.system() == 'Windows' else
+    '$HOME/Library/Application Support/Sublime Text 2' if platform_.system() == 'osx' else
+    '$HOME/.config/sublime-text-2' if platform_.system() == 'Linux' else
+    ''))
+
+def packages_path():
+    return os.path.join(_sublime_data_path, 'Packages')
+
+def installed_packages_path():
+    return os.path.join(_sublime_data_path, 'Installed Packages')
+
 def version():
     return '2000'
 
 def platform():
-    s = platform_.system()
-    if s == 'Windows':
-        return 'windows'
-    elif s == 'osx': # TODO
-        return 'osx'
-    elif s == 'Linux':
-        return 'linux'
-    else:
-        return ''
+    return _osname
 
 def arch():
     return platform_.machine()

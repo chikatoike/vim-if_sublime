@@ -14,13 +14,19 @@ def test_sublime_module():
     >>> #s['api_compatibility_test1'] True
     >>> #s['api_compatibility_test2'] [1, 2, 3]
     >>> # sublime.version()
-    >>> sublime.platform() == "windows" or platform_.system() != 'Windows'
+    >>> sublime.packages_path() == unicode(os.path.expandvars('$APPDATA\\Sublime Text 2\\Packages')) or platform_.system() != 'Windows'
     True
-    >>> sublime.platform() == "osx" or platform_.system() != 'osx'
+    >>> sublime.packages_path() == unicode(os.path.expandvars('$HOME/Library/Application Support/Sublime Text 2/Packages')) or platform_.system() != 'osx'
     True
-    >>> sublime.platform() == "linux" or platform_.system() != 'Linux'
+    >>> sublime.packages_path() == unicode(os.path.expandvars('$HOME/.config/sublime-text-2/Packages')) or platform_.system() != 'Linux'
     True
-    >>> sublime.arch() == "x86" or platform_.machine() != 'x86'
+    >>> sublime.platform() == u'windows' or platform_.system() != 'Windows'
+    True
+    >>> sublime.platform() == u'osx' or platform_.system() != 'osx'
+    True
+    >>> sublime.platform() == u'linux' or platform_.system() != 'Linux'
+    True
+    >>> sublime.arch() == u'x86' or platform_.machine() != 'x86'
     True
     """
 
