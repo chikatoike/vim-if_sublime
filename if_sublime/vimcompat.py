@@ -1,10 +1,10 @@
 # Compatibility layer for if_python and Sublime Text 2 Packages.
 import os
 import glob
+import logging
 import sublime_plugin
 
 debug = False
-test = False
 evalenv = {}
 
 try:
@@ -85,7 +85,7 @@ class VimCompat(object):
         self.vim.command('echomsg g:sublimenv.string', locals())
 
     def trace(self, string):
-        if debug and not test:
+        if debug:
             # string = string if isinstance(string, str) else str(string)
             self.vim.command('echomsg "sublime:" g:sublimenv.string', locals())
 
@@ -136,8 +136,9 @@ class DummyCompat(VimCompat):
         print(string)
 
     def trace(self, string):
-        if debug and not test:
-            print("DummyCompat: " + string)
+        if debug:
+            logging.basicConfig(level=logging.DEBUG)
+            logging.debug(string)
 
     def getvimwindow(self, winnr = -1):
         if winnr == -1:
@@ -171,13 +172,12 @@ class DummyWindow(object):
 
 class DummyBuffer(object):
     def __init__(self, path):
-        self.name = path
-        with open(path, 'r') as f:
+        self.name = os.path.normpath(path)
+        with open(self.name, 'r') as f:
             self.text = f.read().split("\n")
             self.text = [unicode(line, 'utf-8') for line in self.text]
 
     def __getitem__(self, key):
-        # print('DummyBuffer.__getitem__: ' + repr(self.text[key]))
         return self.text[key]
 
 

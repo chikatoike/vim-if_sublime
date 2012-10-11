@@ -32,6 +32,11 @@ def set_timeout(callback, delay):
     """
     deferred.register(Callback(callback, delay))
 
+def active_window():
+    """ TODO Returns current tabpage. """
+    return _window
+
+
 # Deferred {{{1
 class Deferred(object):
     def __init__(self):
@@ -261,7 +266,7 @@ class Window(object):
         return View()
 
     def open_file(self, target, flags = None):
-        compat.message('Window.open_file: ' + target)
+        compat.trace('Window.open_file: ' + target)
         m = re.match(r'^(.*):(\d+):(\d+)$', target)
         if m:
             path, line, col = m.groups()
@@ -328,7 +333,7 @@ class View(object):
 
     def insert(self, edit, point, string):
         # TODO what's edit?
-        compat.message('View.insert: ' + str(point) + ' ' + string)
+        compat.trace('View.insert: ' + str(point) + ' ' + string)
         # raise Exception('halt')
 
     def begin_edit(self, command, args):
@@ -621,7 +626,6 @@ _window = Window()
 
 # doctest
 def _test():
-    vimcompat.test = True
     import doctest
     doctest.testmod()
 
