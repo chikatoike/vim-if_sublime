@@ -6,6 +6,7 @@ import os
 import re
 import glob
 import json
+import platform as platform_
 import sublime_plugin
 import vimcompat
 
@@ -18,7 +19,7 @@ INHIBIT_WORD_COMPLETIONS = 0x01
 INHIBIT_EXPLICIT_COMPLETIONS = 0x02
 
 
-# Global {{{1
+# sublime module {{{1
 def load_settings(setting_filename):
     return Settings(setting_filename)
 
@@ -35,6 +36,23 @@ def set_timeout(callback, delay):
 def active_window():
     """ TODO Returns current tabpage. """
     return _window
+
+def version():
+    return '2000'
+
+def platform():
+    s = platform_.system()
+    if s == 'Windows':
+        return 'windows'
+    elif s == 'osx': # TODO
+        return 'osx'
+    elif s == 'Linux':
+        return 'linux'
+    else:
+        return ''
+
+def arch():
+    return platform_.machine()
 
 
 # Deferred {{{1
