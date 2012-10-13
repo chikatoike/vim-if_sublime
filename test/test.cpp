@@ -15,3 +15,10 @@ int main(int argc, char *argv[])
 	std::string str;
     return 0;
 }
+
+#include "test2.h"
+
+void main2()
+{
+	func();
+}
