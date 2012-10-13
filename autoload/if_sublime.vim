@@ -40,7 +40,7 @@ endfunction
 
 function! if_sublime#loaded_files()
   python import sys, os
-  return pyeval('{ os.path.abspath(module.__file__): key for key, module in sys.modules.items() if hasattr(module, "__file__") }')
+  return pyeval('dict([(os.path.abspath(module.__file__), key) for key, module in sys.modules.items() if hasattr(module, "__file__")])')
 endfunction
 
 function! if_sublime#register_plugin(path)
