@@ -1,0 +1,4 @@
+{
+    "api_compatibility_test1": true,
+    "api_compatibility_test2": [1, 2, 3]
+}

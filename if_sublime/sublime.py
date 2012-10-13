@@ -100,15 +100,12 @@ class Callback(object):
         self.delay = delay
 
 # Plugin interface {{{1
-# plugin_path = []
+plugin_path = []
 
 def add_path(package_path):
-    pass
-    # global plugin_path
-    # plugin_path +=  package_path
-    # plugin_path = [x for i,x in enumerate(plugin_path) if plugin_path.index(x) == i]
-    # sys.path += package_path
-    # sys.path = [x for i,x in enumerate(sys.path) if sys.path.index(x) == i]
+    global plugin_path
+    plugin_path +=  package_path
+    plugin_path = [x for i,x in enumerate(plugin_path) if plugin_path.index(x) == i]
 
 def load_plugin(package_path):
     add_path(package_path)
@@ -269,16 +266,25 @@ class Settings(object):
         >>> s['error_marks_on_panel_only']
         False
         """
-        files = compat.globpath(setting_filename)
-        if not files:
-            return {}
+        files = glob.glob(os.path.join(packages_path(), '*', setting_filename))
+        # TODO non-standard package path
+        # for path in plugin_path:
+        #     files += glob.glob(os.path.join(path, setting_filename))
 
-        with open(files[0], 'r') as f:
-            text = f.read()
-
-        # TODO remove block style comments
-        text = re.sub(r'//.*', '', text) # remove line comments.
-        return json.loads(text)
+        # TODO read order?
+        d = {}
+        for path in files:
+            compat.trace('Settings._load: ' + path)
+            with open(path, 'r') as f:
+                text = f.read()
+                # TODO remove block style comments
+                text = re.sub(r'//.*', '', text) # remove line comments.
+                try:
+                    d.update(json.loads(text))
+                except ValueError:
+                    compat.trace('Settings._load: invalid json file: ' + path)
+                    raise
+        return d
 
 # Edit {{{1
 class Edit(object):

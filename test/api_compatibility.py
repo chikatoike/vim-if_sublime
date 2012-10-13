@@ -10,9 +10,11 @@ def test_sublime_module():
     """
     >>> import sublime
     >>> from api_compatibility import *
-    >>> #s = sublime.load_settings('api_compatibility.sublime-settings')
-    >>> #s['api_compatibility_test1'] True
-    >>> #s['api_compatibility_test2'] [1, 2, 3]
+    >>> s = sublime.load_settings('api_compatibility.sublime-settings')
+    >>> s['api_compatibility_test1']
+    True
+    >>> s['api_compatibility_test2']
+    [1, 2, 3]
     >>> # sublime.version()
     >>> sublime.packages_path() == unicode(os.path.expandvars('$APPDATA\\Sublime Text 2\\Packages')) or platform_.system() != 'Windows'
     True
