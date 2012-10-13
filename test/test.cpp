@@ -21,4 +21,10 @@ int main(int argc, char *argv[])
 void main2()
 {
 	func();
+
+    cls1 c1;
+    c1.method();
+
+    cls2 c2;
+    c2.method();
 }
