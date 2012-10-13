@@ -67,10 +67,30 @@ class VimBuffer(object):
         self.buffer = buffer
 
     def __getitem__(self, key):
-        return unicode(self.buffer[key], compat.getbufferencoding(buffer.name))
+        encoding = compat.getbufferencoding(self.buffer.name)
+        if isinstance(key, slice):
+            data = eval('self.buffer[%s : %s]' % (
+                key.start if not key.start is None else '',
+                key.stop if not key.stop is None else ''
+                ))
+            return [unicode(s, encoding) for s in data]
+        else:
+            return unicode(self.buffer[key], encoding)
 
     def __setitem__(self, key, value):
-        self.buffer[key] = value.encode(compat.getbufferencoding(buffer.name))
+        encoding = compat.getbufferencoding(self.buffer.name)
+        if isinstance(key, slice):
+            data = [s.encode(encoding) for s in value]
+            eval('self.buffer[%s : %s] = data' % (
+                key.start if not key.start is None else '',
+                key.stop if not key.stop is None else ''
+                ))
+        else:
+            self.buffer[key] = data.encode(encoding)
+
+    @property
+    def name(self):
+        return self.buffer.name
 
     # TODO implement other attributes.
 
@@ -91,9 +111,9 @@ class VimCompat(object):
 
     def getvimwindow(self, winnr = -1):
         if winnr == -1:
-            return vim.current.window
+            return VimWindow(vim.current.window)
         else:
-            return vim.windows[winnr - 1]
+            return VimWindow(vim.windows[winnr - 1])
 
     def getbufvar(self, path, option):
         return self.vim.eval('getbufvar(g:sublimenv.path, g:sublimenv.option)', locals())
@@ -106,9 +126,9 @@ class VimCompat(object):
         return self.vim.eval('get(g:vimsublime_filetype, getbufvar(g:sublimenv.path, "&filetype"), "")', locals())
 
     def getbufferencoding(self, path):
-        encoding = compat.getbufvar(buffer.name, '&fileencoding')
+        encoding = compat.getbufvar(path, '&fileencoding')
         if encoding == '':
-            encoding = compat.getbufvar(buffer.name, '&encoding')
+            encoding = compat.getbufvar(path, '&encoding')
         return encoding
 
     def globpath(self, pattern):

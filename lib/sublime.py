@@ -277,7 +277,7 @@ class Settings(object):
         """
         d = {}
         for path in _glob(setting_filename):
-            compat.trace('Settings._load: ' + path)
+            # compat.trace('Settings._load: ' + path)
             with open(path, 'r') as f:
                 text = f.read()
                 # TODO remove block style comments
