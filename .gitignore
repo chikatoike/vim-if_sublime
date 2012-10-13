@@ -1,2 +1,4 @@
 *.pyc
 *.bak
+debug/
+README.html
