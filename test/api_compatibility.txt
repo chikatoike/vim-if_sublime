@@ -29,7 +29,7 @@ True
 True
 >>> sublime.platform() == u'linux' or platform_.system() != 'Linux'
 True
->>> sublime.arch() == u'x86' or platform_.machine() != 'x86'
+>>> sublime.arch() == u'x32' or platform_.machine() != 'x86'
 True
 
 >>> # Test view {{{1

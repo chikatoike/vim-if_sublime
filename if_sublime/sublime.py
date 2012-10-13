@@ -73,7 +73,7 @@ def platform():
     return _osname
 
 def arch():
-    return unicode(platform_.machine())
+    return u'x32' if platform_.machine() == 'x86' else u'x64'
 
 
 # Deferred {{{1
