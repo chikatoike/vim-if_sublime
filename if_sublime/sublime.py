@@ -48,17 +48,17 @@ def scope_selector(scope, selector):
 
 
 # sublime module (platform) {{{1
-_osname = unicode(
-    'windows' if platform_.system() == 'Windows' else
-    'osx' if platform_.system() == 'osx' else
-    'linux' if platform_.system() == 'Linux' else
-    '')
+_osname = (
+    u'windows' if platform_.system() == 'Windows' else
+    u'osx' if platform_.system() == 'osx' else
+    u'linux' if platform_.system() == 'Linux' else
+    u'')
 
-_sublime_data_path = unicode(os.path.expandvars(
-    '$APPDATA\\Sublime Text 2' if platform_.system() == 'Windows' else
-    '$HOME/Library/Application Support/Sublime Text 2' if platform_.system() == 'osx' else
-    '$HOME/.config/sublime-text-2' if platform_.system() == 'Linux' else
-    ''))
+_sublime_data_path = os.path.expandvars(
+    ur'$APPDATA\Sublime Text 2' if platform_.system() == 'Windows' else
+    ur'$HOME/Library/Application Support/Sublime Text 2' if platform_.system() == 'osx' else
+    ur'$HOME/.config/sublime-text-2' if platform_.system() == 'Linux' else
+    ur'')
 
 def packages_path():
     return os.path.join(_sublime_data_path, 'Packages')
@@ -67,13 +67,13 @@ def installed_packages_path():
     return os.path.join(_sublime_data_path, 'Installed Packages')
 
 def version():
-    return '2000'
+    return u'2000'
 
 def platform():
     return _osname
 
 def arch():
-    return platform_.machine()
+    return unicode(platform_.machine())
 
 
 # Deferred {{{1
@@ -666,10 +666,10 @@ deferred = Deferred()
 _window = Window()
 
 
-# doctest
-def _test():
+if __name__ == "__main__":
+    vimcompat.debug = True
     import doctest
     doctest.testmod()
-
-if __name__ == "__main__":
-    _test()
+    import unittest
+    unittest.TextTestRunner().run(doctest.DocFileSuite(
+        os.path.join(os.path.dirname(__file__), '../test/api_compatibility.txt')))

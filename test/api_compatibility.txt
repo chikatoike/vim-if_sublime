@@ -1,0 +1,39 @@
+>>> # vim:ft=python
+>>> import os
+>>> import sublime
+>>> from sublime import *
+
+>>> # Utility {{{1
+>>> def src(name):
+...     return os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), name))
+
+>>> # Test sublime module
+>>> s = sublime.load_settings('api_compatibility.sublime-settings')
+>>> s.get('api_compatibility_test1')
+True
+>>> s.get('api_compatibility_test2') == [1L, 2L, 3L]
+True
+
+>>> # Test platform {{{1
+>>> import platform as platform_
+>>> # sublime.version()
+>>> sublime.packages_path() == os.path.expandvars(ur'$APPDATA\Sublime Text 2\Packages') or platform_.system() != 'Windows'
+True
+>>> sublime.packages_path() == os.path.expandvars(ur'$HOME/Library/Application Support/Sublime Text 2/Packages') or platform_.system() != 'osx'
+True
+>>> sublime.packages_path() == os.path.expandvars(ur'$HOME/.config/sublime-text-2/Packages') or platform_.system() != 'Linux'
+True
+>>> sublime.platform() == u'windows' or platform_.system() != 'Windows'
+True
+>>> sublime.platform() == u'osx' or platform_.system() != 'osx'
+True
+>>> sublime.platform() == u'linux' or platform_.system() != 'Linux'
+True
+>>> sublime.arch() == u'x86' or platform_.machine() != 'x86'
+True
+
+>>> # Test view {{{1
+>>> view = sublime.active_window().open_file(src('test.cpp'))
+>>> view.rowcol(0)
+(0, 0)
+
