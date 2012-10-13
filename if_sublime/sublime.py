@@ -99,6 +99,18 @@ class Callback(object):
         self.func = func
         self.delay = delay
 
+# glob {{{1
+def _glob(base_name_pattern):
+    files = []
+    for path in plugin_path:
+        files += glob.glob(os.path.join(path, base_name_pattern))
+
+    files += glob.glob(os.path.join(packages_path(), 'User', base_name_pattern))
+
+    vim_plugin = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../plugin/if_sublime')
+    files += glob.glob(os.path.join(vim_plugin, base_name_pattern))
+    return files
+
 # Plugin interface {{{1
 plugin_path = []
 
@@ -258,19 +270,13 @@ class Settings(object):
     def _load(setting_filename):
         """ required path relative to package's root directory.
         >>> s = Settings._load('SublimeClang.sublime-settings')
-        >>> s['enabled']
-        True
-        >>> s['error_marks_on_panel_only']
+        >>> s.get('warm_up_in_separate_thread')
         False
+        >>> s.get('debug_options')
+        True
         """
-        files = glob.glob(os.path.join(packages_path(), '*', setting_filename))
-        # TODO non-standard package path
-        # for path in plugin_path:
-        #     files += glob.glob(os.path.join(path, setting_filename))
-
-        # TODO read order?
         d = {}
-        for path in files:
+        for path in _glob(setting_filename):
             compat.trace('Settings._load: ' + path)
             with open(path, 'r') as f:
                 text = f.read()
@@ -316,6 +322,7 @@ class Window(object):
         else:
             # TODO ignore line, col
             compat.open_file(target)
+        return self.active_view()
 
     def show_quick_panel(self, items, on_done, flags = None):
         # TODO inputlist() or unite.vim
@@ -672,4 +679,4 @@ if __name__ == "__main__":
     doctest.testmod()
     import unittest
     unittest.TextTestRunner().run(doctest.DocFileSuite(
-        os.path.join(os.path.dirname(__file__), '../test/api_compatibility.txt')))
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), '../test/api_compatibility.txt')))
