@@ -119,7 +119,7 @@ function! if_sublime#scope()
   return s:
 endfunction
 
-call s:add_path([expand('<sfile>:p:h:h') . '/if_sublime'])
+call s:add_path([expand('<sfile>:p:h:h') . '/lib'])
 
 function! if_sublime#debug_reload()
   python <<EOM
