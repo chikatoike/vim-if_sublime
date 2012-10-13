@@ -226,14 +226,11 @@ def _call_event_listeners(view, event_name):
 
 # Settings {{{1
 class Settings(object):
+    """
+    NOTE it is not subscriptable.
+    """
     def __init__(self, setting_filename):
         self.settings = Settings._load(setting_filename)
-
-    def __getitem__(self, key):
-      return self.settings[key]
-
-    def __setitem__(self, key, value):
-      self.settings[key] = value
 
     def get(self, name, default = None):
         if self.settings.has_key(name):

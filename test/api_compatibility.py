@@ -4,17 +4,18 @@ import platform as platform_
 
 
 def source(name):
-    return os.path.normpath(os.path.dirname(__file__) + '/' + name)
+    return os.path.normpath(os.path.join(os.path.dirname(__file__), name))
 
 def test_sublime_module():
     """
+    >>> import os
     >>> import sublime
     >>> from api_compatibility import *
     >>> s = sublime.load_settings('api_compatibility.sublime-settings')
-    >>> s['api_compatibility_test1']
+    >>> s.get('api_compatibility_test1')
     True
-    >>> s['api_compatibility_test2']
-    [1, 2, 3]
+    >>> s.get('api_compatibility_test2') == [1L, 2L, 3L]
+    True
     >>> # sublime.version()
     >>> sublime.packages_path() == unicode(os.path.expandvars('$APPDATA\\Sublime Text 2\\Packages')) or platform_.system() != 'Windows'
     True
