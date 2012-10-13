@@ -158,10 +158,9 @@ class DummyCompat(VimCompat):
 
     def open_file(self, path, line = 0, col = 0):
         self.windows[0] = DummyWindow(path)
-        self.current.window.buffer = DummyBuffer(path)
+        self.current.window.buffer = self.windows[0].buffer
         self.current.window.cursor = (line, col)
         self.current.buffer = self.current.window.buffer
-        self.trace('DummyCompat.open_file: ' + repr(self.current.buffer[line]))
 
 class DummyWindow(object):
     def __init__(self, path):

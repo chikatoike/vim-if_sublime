@@ -314,7 +314,7 @@ class Window(object):
         return View()
 
     def open_file(self, target, flags = None):
-        compat.trace('Window.open_file: ' + target)
+        # compat.trace('Window.open_file: ' + target)
         m = re.match(r'^(.*):(\d+):(\d+)$', target)
         if m:
             path, line, col = m.groups()
@@ -393,21 +393,6 @@ class View(object):
         pass
 
     def rowcol(self, point):
-        """
-        >>> view = View()
-        >>> view.rowcol(0)
-        (0, 0)
-        >>> view.rowcol(1)
-        (0, 1)
-        >>> view.rowcol(17)
-        (0, 17)
-        >>> view.rowcol(18)
-        (0, 18)
-        >>> view.rowcol(19)
-        (1, 0)
-        >>> view.rowcol(20)
-        (1, 1)
-        """
         if isinstance(point, Point):
             return point.get(self)
         elif isinstance(point, int):
@@ -430,7 +415,7 @@ class View(object):
 
     def _substr_pos(self, line, col):
         """
-        >>> view = View()
+        >>> view = _test_view()
         >>> view._substr_pos(0, 0)
         u''
         """
@@ -450,29 +435,6 @@ class View(object):
         raise Exception('View._get_rowcol: point is out of range.')
 
     def substr(self, point):
-        """
-        >>> view = View()
-        >>> view.substr(view.text_point(0, 0))
-        u'#'
-        >>> view.substr(Region(0, 0))
-        u''
-        >>> view.substr(Region(0, 1))
-        u'#'
-        >>> view.substr(Region(0, 18))
-        u'#include "stdio.h"'
-        >>> view.substr(Region(0, 19))
-        u'#include "stdio.h"\\n'
-        >>> view.substr(Region(view.text_point(0, 0), view.text_point(0, 5)))
-        u'#incl'
-        >>> view.substr(Region(view.text_point(11, 1), view.text_point(11, 6)))
-        u'type1'
-        >>> view._get_match_pos(r'\w+', '\\tt.member1 = 1;', 4)
-        (3, 10)
-        >>> view.word(view.text_point(12, 4)).get(view)
-        ((12, 3), (12, 10))
-        >>> view.substr(view.word(view.text_point(12, 4)))
-        u'member1'
-        """
         if isinstance(point, Point):
             line, col = self.rowcol(point)
             compat.trace('View.substr: point: ' + repr(self.vimwin.buffer[line][col]))
@@ -493,11 +455,6 @@ class View(object):
             return '\n'.join(lines)
 
     def line(self, point):
-        """
-        >>> view = View()
-        >>> view.substr(view.line(view.text_point(0, 0))) # NOTE: line() does not contains eol.
-        u'#include "stdio.h"'
-        """
         # args is point or region
         if isinstance(point, Point):
             line, _ = self.rowcol(point)
@@ -510,11 +467,6 @@ class View(object):
             return self.line(region.a)
 
     def word(self, point):
-        """
-        >>> view = View()
-        >>> view.substr(view.word(view.text_point(11, 5)))
-        u'type1'
-        """
         # args is point or region
         if isinstance(point, Point):
             line, col = self.rowcol(point)
@@ -527,11 +479,15 @@ class View(object):
 
     def _get_match_pos(self, pattern, text, current_col):
         """
-        >>> view = View()
+        >>> view = _test_view()
         >>> view._get_match_pos(r'\w+', 'def aaa(arg):', 0)
         (0, 3)
         >>> view._get_match_pos(r'\w+', '\\tdef aaa(arg):', 6)
         (5, 8)
+        >>> view._get_match_pos(r'\w+', '\\tt.member1 = 1;', 4)
+        (3, 10)
+        >>> view.word(view.text_point(12, 4)).get(view)
+        ((12, 3), (12, 10))
         """
         for m in re.finditer(pattern, text):
             if m.start() <= current_col <= m.end():
@@ -555,7 +511,7 @@ class RegionSet(object):
 
     def __iter__(self):
         """
-        >>> view = View()
+        >>> view = _test_view()
         >>> r = Region(view.text_point(0, 0), view.text_point(0, 1))
         >>> [i for i in RegionSet(r, view)][0].begin().get(view)
         (0, 0)
@@ -602,7 +558,7 @@ class Region(object):
 
     def begin(self):
         """
-        >>> view = View()
+        >>> view = _test_view()
         >>> r = Region(view.text_point(0, 0), view.text_point(0, 1))
         >>> r.begin().get(view)
         (0, 0)
@@ -611,7 +567,7 @@ class Region(object):
 
     def end(self):
         """
-        >>> view = View()
+        >>> view = _test_view()
         >>> r = Region(view.text_point(0, 0), view.text_point(0, 1))
         >>> r.end().get(view)
         (0, 1)
@@ -673,10 +629,16 @@ deferred = Deferred()
 _window = Window()
 
 
+# test {{{1
+def src(name):
+    return os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '../test', name))
+
+def _test_view():
+    return active_window().open_file(src('test.cpp'))
+
 if __name__ == "__main__":
     vimcompat.debug = True
     import doctest
-    doctest.testmod()
+    doctest.testmod(report=True)
     import unittest
-    unittest.TextTestRunner().run(doctest.DocFileSuite(
-        os.path.join(os.path.dirname(os.path.abspath(__file__)), '../test/api_compatibility.txt')))
+    unittest.TextTestRunner().run(doctest.DocFileSuite(src('api_compatibility.txt')))

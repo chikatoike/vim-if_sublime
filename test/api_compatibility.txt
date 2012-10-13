@@ -36,4 +36,36 @@ True
 >>> view = sublime.active_window().open_file(src('test.cpp'))
 >>> view.rowcol(0)
 (0, 0)
+>>> view.rowcol(1)
+(0, 1)
+>>> view.rowcol(17)
+(0, 17)
+>>> view.rowcol(18)
+(0, 18)
+>>> view.rowcol(19)
+(1, 0)
+>>> view.rowcol(20)
+(1, 1)
 
+>>> # substr {{{1
+>>> view.substr(view.text_point(0, 0))
+u'#'
+>>> view.substr(Region(0, 0))
+u''
+>>> view.substr(Region(0, 1))
+u'#'
+>>> view.substr(Region(0, 18))
+u'#include "stdio.h"'
+>>> view.substr(Region(0, 19))
+u'#include "stdio.h"\n'
+>>> view.substr(Region(view.text_point(0, 0), view.text_point(0, 5)))
+u'#incl'
+>>> view.substr(Region(view.text_point(11, 1), view.text_point(11, 6)))
+u'type1'
+>>> view.substr(view.word(view.text_point(12, 4)))
+u'member1'
+
+>>> view.substr(view.line(view.text_point(0, 0))) # NOTE: line() does not contains eol.
+u'#include "stdio.h"'
+>>> view.substr(view.word(view.text_point(11, 5)))
+u'type1'
