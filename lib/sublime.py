@@ -314,13 +314,16 @@ class Window(object):
         return View()
 
     def open_file(self, target, flags = None):
-        # compat.trace('Window.open_file: ' + target)
-        m = re.match(r'^(.*):(\d+):(\d+)$', target)
-        if m:
-            path, line, col = m.groups()
-            compat.open_file(path, int(line), int(col))
+        if not flags is None and (flags & ENCODED_POSITION) != 0:
+            compat.trace('Window.open_file: ' + target)
+            m = re.match(r'^(.*):(\d+):(\d+)$', target)
+            if m:
+                path, line, col = m.groups()
+                compat.open_file(path, int(line), int(col))
+            else:
+                # TODO ignore line, col
+                compat.open_file(target)
         else:
-            # TODO ignore line, col
             compat.open_file(target)
         return self.active_view()
 
