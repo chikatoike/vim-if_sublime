@@ -139,7 +139,7 @@ def load_plugin(package_path):
 
 def source_plugin(fname):
     modulename, ext = os.path.splitext(os.path.basename(fname))
-    if sys.modules.has_key(modulename):
+    if modulename in sys.modules:
         return
     imp.load_source(modulename, fname)
 
@@ -241,15 +241,20 @@ class Settings(object):
     """
     NOTE it is not subscriptable.
     """
-    def __init__(self, setting_filename):
-        self.settings = Settings._load(setting_filename)
+    def __init__(self, setting_filename=None):
+        if not setting_filename is None:
+            self.settings = Settings._load(setting_filename)
+        else:
+            self.settings = {}
 
     def get(self, name, default = None):
-        if self.settings.has_key(name):
+        if name in self.settings:
             return self.settings[name]
-        else:
-            # TODO raise if default = None
+        elif not default is None:
             return default
+        else:
+            # TODO raise DataError()
+            return None
 
     def set(self, name, value):
         self.settings[name] = value
@@ -258,7 +263,7 @@ class Settings(object):
         del self.settings[name]
 
     def has(self, name):
-        return self.settings.has_key(name)
+        return name in self.settings
 
     def add_on_change(self, key, on_change):
         pass # TODO
@@ -297,7 +302,7 @@ class Edit(object):
 # Window {{{1
 class Window(object):
     def __init__(self):
-        pass
+        self.panels = {}
 
     def run_command(self, command_name, args = []):
         """
@@ -339,11 +344,21 @@ class Window(object):
         else:
             return []
 
+    def get_output_panel(self, name):
+        if name in self.panels:
+            return self.panels[name]
+        else:
+            return Panel(name)
 
 # View {{{1
 class View(object):
     def __init__(self):
         self.vimwin = compat.getvimwindow()
+        self.status = {}
+        self._settings = Settings()
+
+    def settings(self):
+        return self._settings
 
     def run_command(self, command_name, args = []):
         """
@@ -369,10 +384,23 @@ class View(object):
         return _window
 
     def is_dirty(self):
-        return compat.getbufvar(self.vimwin.buffer.name, '&modified') != '0'
+        return compat.getbufvar(self.vimwin.buffer.name, '&modified') == '1'
 
     def is_scratch(self):
         return compat.getbufvar(self.vimwin.buffer.name, '&buftype') != ''
+
+    def set_scratch(self, value):
+        compat.setbufvar(self.vimwin.buffer.name, '&buftype', 'nofile' if value else '')
+
+    def is_read_only(self):
+        return compat.getbufvar(self.vimwin.buffer.name, '&readonly') == '1'
+
+    def set_read_only(self, value):
+        compat.setbufvar(self.vimwin.buffer.name, '&readonly', 1 if value else 0)
+
+    def set_syntax_file(self, syntax_file):
+        # TODO
+        pass
 
     def sel(self):
         """
@@ -382,11 +410,6 @@ class View(object):
         # vimwin.cursor[1]: col is zero based.
         cursor = self.vimwin.cursor
         return RegionSet(Region(self.text_point(cursor[0] - 1, cursor[1])), self)
-
-    def insert(self, edit, point, string):
-        # TODO what's edit?
-        compat.trace('View.insert: ' + str(point) + ' ' + string)
-        # raise Exception('halt')
 
     def begin_edit(self, command, args):
         # Returns edit object.
@@ -436,6 +459,20 @@ class View(object):
             i += llen
             row += 1
         raise Exception('View._get_rowcol: point is out of range.')
+
+    def size(self):
+        return len('\n'.join(self.vimwin.buffer[:]))
+
+    def insert(self, edit, point, string):
+        compat.trace('View.insert: ' + str(point) + ' ' + string)
+
+    def erase(self, edit, region):
+        # TODO
+        pass
+
+    def replace(self, edit, region, string):
+        # TODO
+        pass
 
     def substr(self, point):
         if isinstance(point, Point):
@@ -496,6 +533,37 @@ class View(object):
             if m.start() <= current_col <= m.end():
                 return (m.start(), m.end())
         return None
+
+    # TODO regions {{{2
+    def add_regions(self, key, regions, scope, icon=None, flags=None):
+        pass
+
+    def get_regions(self, key):
+        return []
+
+    def erase_regions(self, key):
+        pass
+
+    # status {{{2
+    # TODO show status
+    def set_status(self, key, value):
+        compat.trace('View.set_status: ' + repr({key: value}))
+        self.status[key] = value
+
+    def get_status(self, key):
+        return self.status[key]
+
+    def erase_status(self, key):
+        if key in self.status:
+            self.status.pop(key)
+        else:
+            compat.trace('View.erase_status: not found key: ' + repr(key))
+
+
+class Panel(View):
+    def __init__(self, name):
+        super(Panel, self).__init__()
+        self.name = name
 
 
 # Geometry {{{1

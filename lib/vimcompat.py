@@ -118,6 +118,9 @@ class VimCompat(object):
     def getbufvar(self, path, option):
         return self.vim.eval('getbufvar(g:sublimenv.path, g:sublimenv.option)', locals())
 
+    def setbufvar(self, path, option, value):
+        self.vim.eval('setbufvar(g:sublimenv.path, g:sublimenv.option, g:sublimenv.value)', locals())
+
     # def getbufvarbool(self, path, option):
     #     return self.vim.eval('getbufvar(g:sublimenv.path, g:sublimenv.option)', locals()) != '0'
 
@@ -167,7 +170,10 @@ class DummyCompat(VimCompat):
             return self.windows[winnr - 1]
 
     def getbufvar(self, path, option):
-        return ''
+        return self.current.buffer.bufvar.get(option, '')
+
+    def setbufvar(self, path, option, value):
+        self.current.buffer.bufvar[option] = value
 
     def getfiletype(self, path):
         return 'c++'
@@ -195,6 +201,7 @@ class DummyBuffer(object):
         with open(self.name, 'r') as f:
             self.text = f.read().split("\n")
             self.text = [unicode(line, 'utf-8') for line in self.text]
+        self.bufvar = {}
 
     def __getitem__(self, key):
         return self.text[key]
