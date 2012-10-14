@@ -143,20 +143,23 @@ def source_plugin(fname):
         return
     imp.load_source(modulename, fname)
 
-def run_window_command(command_name, args = []):
+def run_window_command(command_name, args = {}):
     _window.run_command(command_name, args)
 
-def run_text_command(command_name, args = []):
+def run_text_command(command_name, args = {}):
     _window.active_view().run_command(command_name, args)
 
-def run_command(command_name, args = []):
+def run_command(command_name, args = {}):
     """
     Runs the named ApplicationCommand.
     """
     try:
         plugin = _find_command(command_name, sublime_plugin.ApplicationCommand.__subclasses__())
         command = plugin()
-        command.run() # TODO args
+        if args:
+            command.run(**args)
+        else:
+            command.run()
     finally:
         pass
 
@@ -304,14 +307,17 @@ class Window(object):
     def __init__(self):
         self.panels = {}
 
-    def run_command(self, command_name, args = []):
+    def run_command(self, command_name, args = {}):
         """
         Runs the named WindowCommand.
         """
         try:
             plugin = _find_command(command_name, sublime_plugin.WindowCommand.__subclasses__())
             command = plugin(self)
-            command.run() # TODO args
+            if args:
+                command.run(**args)
+            else:
+                command.run()
         finally:
             pass
 
@@ -360,7 +366,7 @@ class View(object):
     def settings(self):
         return self._settings
 
-    def run_command(self, command_name, args = []):
+    def run_command(self, command_name, args = {}):
         """
         Runs the named TextCommand.
         """
@@ -368,7 +374,10 @@ class View(object):
         try:
             plugin = _find_command(command_name, sublime_plugin.TextCommand.__subclasses__())
             command = plugin(self)
-            command.run(edit)
+            if args:
+                command.run(edit, **args)
+            else:
+                command.run(edit)
         finally:
             self.end_edit(edit)
 
