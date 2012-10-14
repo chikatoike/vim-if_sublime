@@ -36,11 +36,11 @@ def setvimenv(env):
     vim.command('unlet! g:sublimenv')
     vim.command('let g:sublimenv = pyeval("vimcompat.evalenv")')
 
-def vimeval(expr, env = {}):
+def vimeval(expr, env={}):
     setvimenv(env.copy())
     return vim.eval(expr)
 
-def vimcommand(expr, env = {}):
+def vimcommand(expr, env={}):
     setvimenv(env.copy())
     return vim.command(expr)
 
@@ -109,7 +109,7 @@ class VimCompat(object):
             # string = string if isinstance(string, str) else str(string)
             self.vim.command('echomsg "sublime:" g:sublimenv.string', locals())
 
-    def getvimwindow(self, winnr = -1):
+    def getvimwindow(self, winnr=-1):
         if winnr == -1:
             return VimWindow(vim.current.window)
         else:
@@ -139,7 +139,7 @@ class VimCompat(object):
         # return self.vim.eval(
         #         'split(globpath(&runtimepath, g:sublimenv.pattern), "\\n")', locals())
 
-    def open_file(self, path, line = 0, col = 0):
+    def open_file(self, path, line=0, col=0):
         if line == 0:
             self.vim.command('edit `=g:sublimenv.path`', locals())
         else:
@@ -163,7 +163,7 @@ class DummyCompat(VimCompat):
             logging.basicConfig(level=logging.DEBUG)
             logging.debug(string)
 
-    def getvimwindow(self, winnr = -1):
+    def getvimwindow(self, winnr=-1):
         if winnr == -1:
             return self.current.window
         else:
@@ -182,7 +182,7 @@ class DummyCompat(VimCompat):
         dir = os.path.dirname(__file__)
         return glob.glob(os.path.join(dir, pattern))
 
-    def open_file(self, path, line = 0, col = 0):
+    def open_file(self, path, line=0, col=0):
         self.windows[0] = DummyWindow(path)
         self.current.window.buffer = self.windows[0].buffer
         self.current.window.cursor = (line, col)
@@ -212,11 +212,11 @@ compat = create_compat()
 
 # Sublime Text 2 builtin commands {{{1
 class DummyCommand(object):
-    def __init__(self, extra = None):
+    def __init__(self, extra=None):
         # compat.trace('DummyCommand.__init__')
         pass
 
-    def run(self, extra = None):
+    def run(self, extra=None):
         compat.trace('DummyCommand:')
         # compat.trace('DummyCommand:' + getcallerinfo())
 

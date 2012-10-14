@@ -143,13 +143,13 @@ def source_plugin(fname):
         return
     imp.load_source(modulename, fname)
 
-def run_window_command(command_name, args = {}):
+def run_window_command(command_name, args={}):
     _window.run_command(command_name, args)
 
-def run_text_command(command_name, args = {}):
+def run_text_command(command_name, args={}):
     _window.active_view().run_command(command_name, args)
 
-def run_command(command_name, args = {}):
+def run_command(command_name, args={}):
     """
     Runs the named ApplicationCommand.
     """
@@ -179,19 +179,19 @@ def _camelize(str):
     return p.sub((lambda match: match.groups(0)[1].upper()), str)
 
 # EventListener {{{1
-def on_new(view = None): _call_event_listeners(view, 'on_new')
-def on_clone(view = None): _call_event_listeners(view, 'on_clone')
-def on_load(view = None): _call_event_listeners(view, 'on_load')
-def on_close(view = None): _call_event_listeners(view, 'on_close')
-def on_pre_save(view = None): _call_event_listeners(view, 'on_pre_save')
-def on_post_save(view = None): _call_event_listeners(view, 'on_post_save')
-def on_modified(view = None): _call_event_listeners(view, 'on_modified')
-def on_selection_modified(view = None): _call_event_listeners(view, 'on_selection_modified')
-def on_activated(view = None): _call_event_listeners(view, 'on_activated')
-def on_deactivated(view = None): _call_event_listeners(view, 'on_deactivated')
-# def on_query_context(view = None): pass
+def on_new(view=None): _call_event_listeners(view, 'on_new')
+def on_clone(view=None): _call_event_listeners(view, 'on_clone')
+def on_load(view=None): _call_event_listeners(view, 'on_load')
+def on_close(view=None): _call_event_listeners(view, 'on_close')
+def on_pre_save(view=None): _call_event_listeners(view, 'on_pre_save')
+def on_post_save(view=None): _call_event_listeners(view, 'on_post_save')
+def on_modified(view=None): _call_event_listeners(view, 'on_modified')
+def on_selection_modified(view=None): _call_event_listeners(view, 'on_selection_modified')
+def on_activated(view=None): _call_event_listeners(view, 'on_activated')
+def on_deactivated(view=None): _call_event_listeners(view, 'on_deactivated')
+# def on_query_context(view=None): pass
 
-def on_query_completions(line = -1, col = -1, prefix = '', view = None):
+def on_query_completions(line=-1, col=-1, prefix='', view=None):
     view = view if not view is None else _window.active_view()
 
     if line < 0 or  col < 0:
@@ -250,7 +250,7 @@ class Settings(object):
         else:
             self.settings = {}
 
-    def get(self, name, default = None):
+    def get(self, name, default=None):
         if name in self.settings:
             return self.settings[name]
         elif not default is None:
@@ -307,7 +307,7 @@ class Window(object):
     def __init__(self):
         self.panels = {}
 
-    def run_command(self, command_name, args = {}):
+    def run_command(self, command_name, args={}):
         """
         Runs the named WindowCommand.
         """
@@ -324,7 +324,7 @@ class Window(object):
     def active_view(self):
         return View()
 
-    def open_file(self, target, flags = None):
+    def open_file(self, target, flags=None):
         if not flags is None and (flags & ENCODED_POSITION) != 0:
             compat.trace('Window.open_file: ' + target)
             m = re.match(r'^(.*):(\d+):(\d+)$', target)
@@ -338,7 +338,7 @@ class Window(object):
             compat.open_file(target)
         return self.active_view()
 
-    def show_quick_panel(self, items, on_done, flags = None):
+    def show_quick_panel(self, items, on_done, flags=None):
         # TODO inputlist() or unite.vim
         compat.trace('Window.show_quick_panel: ' + repr(items))
         on_done(0)
@@ -366,7 +366,7 @@ class View(object):
     def settings(self):
         return self._settings
 
-    def run_command(self, command_name, args = {}):
+    def run_command(self, command_name, args={}):
         """
         Runs the named TextCommand.
         """
@@ -614,7 +614,7 @@ class Region(object):
     Region is same as vim's visual mode selection.
     NOTE Vim cannot have multiple regions.
     """
-    def __init__(self, a, b = None):
+    def __init__(self, a, b=None):
         """
         a is the first end of region and point of cursor.
         b is the second end of region.
