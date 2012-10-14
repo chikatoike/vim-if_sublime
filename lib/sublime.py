@@ -325,6 +325,9 @@ class Window(object):
         return View()
 
     def open_file(self, target, flags=None):
+        """
+        NOTE TRANSIENT is never used.
+        """
         if not flags is None and (flags & ENCODED_POSITION) != 0:
             compat.trace('Window.open_file: ' + target)
             m = re.match(r'^(.*):(\d+):(\d+)$', target)
