@@ -370,13 +370,14 @@ class View(object):
         """
         Runs the named TextCommand.
         """
-        edit = self.begin_edit(command_name, args[:])
         try:
             plugin = _find_command(command_name, sublime_plugin.TextCommand.__subclasses__())
             command = plugin(self)
             if args:
+                edit = self.begin_edit(command_name, args)
                 command.run(edit, **args)
             else:
+                edit = self.begin_edit(command_name)
                 command.run(edit)
         finally:
             self.end_edit(edit)
@@ -420,7 +421,7 @@ class View(object):
         cursor = self.vimwin.cursor
         return RegionSet(Region(self.text_point(cursor[0] - 1, cursor[1])), self)
 
-    def begin_edit(self, command, args):
+    def begin_edit(self, command=None, args={}):
         # Returns edit object.
         return {}
 
