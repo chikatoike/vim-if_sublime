@@ -69,6 +69,8 @@ class VimBuffer(object):
     def __getitem__(self, key):
         encoding = compat.getbufferencoding(self.buffer.name)
         if isinstance(key, slice):
+            if not key.step is None:
+                raise TypeError("sequence index must be integer, not 'slice'")
             data = eval('self.buffer[%s : %s]' % (
                 key.start if not key.start is None else '',
                 key.stop if not key.stop is None else ''
@@ -80,6 +82,8 @@ class VimBuffer(object):
     def __setitem__(self, key, value):
         encoding = compat.getbufferencoding(self.buffer.name)
         if isinstance(key, slice):
+            if not key.step is None:
+                raise TypeError("sequence index must be integer, not 'slice'")
             data = [s.encode(encoding) for s in value]
             eval('self.buffer[%s : %s] = data' % (
                 key.start if not key.start is None else '',
