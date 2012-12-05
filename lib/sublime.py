@@ -138,7 +138,7 @@ def load_plugin(package_path):
     os.chdir(prev_dir)
 
 def source_plugin(fname):
-    modulename, ext = os.path.splitext(os.path.basename(fname))
+    modulename, _ = os.path.splitext(os.path.basename(fname))
     if modulename in sys.modules:
         return
     imp.load_source(modulename, fname)
@@ -516,8 +516,18 @@ class View(object):
         elif isinstance(point, Region):
             region = point
             # TODO
-            # raise NotImplementedError
             return self.line(region.a)
+
+    def full_line(self, point):
+        # args is point or region
+        if isinstance(point, Point):
+            line, _ = self.rowcol(point)
+            end = len(self.vimwin.buffer[line])
+            return Region(self.text_point(line, 0), self.text_point(line, end + 1))
+        elif isinstance(point, Region):
+            region = point
+            # TODO
+            return self.full_line(region.a)
 
     def word(self, point):
         # args is point or region

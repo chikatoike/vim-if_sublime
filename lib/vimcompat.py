@@ -130,7 +130,8 @@ class VimCompat(object):
 
     def getfiletype(self, path):
         self.trace('VimCompat.getfiletype: ' + path)
-        return self.vim.eval('get(g:vimsublime_filetype, getbufvar(g:sublimenv.path, "&filetype"), "")', locals())
+        ft = self.vim.eval('getbufvar(g:sublimenv.path, "&filetype")', locals())
+        return self.vim.eval('get(g:vimsublime_filetype, g:sublimenv.ft, g:sublimenv.ft)', locals())
 
     def getbufferencoding(self, path):
         encoding = compat.getbufvar(path, '&fileencoding')
